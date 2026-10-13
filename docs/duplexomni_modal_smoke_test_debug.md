@@ -349,16 +349,80 @@ echo "$SETUPTOOLS_SCM_PRETEND_VERSION"
 
 Không nên coi timeout compile là lỗi inference hay lỗi CUDA nếu log chưa có compile error.
 
-## 9. Bước tiếp theo
+## 9. Kết quả build smoke ban đầu
 
-Sau khi editable build hoàn tất:
+### Kết quả cuối cùng
 
-1. Xác nhận `import vllm` trỏ đúng vào modified fork.
-2. Cài các runtime requirements cần cho inference.
-3. Xác định checkpoint/model path.
-4. Chạy thinker/talker smoke test tối thiểu.
-5. Chạy một request end-to-end.
-6. Ghi baseline VRAM, load time và latency trước khi thử quantization.
+Kết quả build smoke ban đầu đã hoàn tất:
 
-Không bắt đầu quantization hoặc realtime benchmark trước khi có baseline BF16 chạy ổn định.
+- Compile 352/352 CUDA/C++ tasks.
+- Editable install của modified vLLM thành công.
+- `import vllm` thành công.
+- Kiểm tra source bằng `os.path.samefile` thành công dù Modal expose cùng volume qua hai path alias khác nhau.
+- Artifact đã được commit vào Modal Volume để tái sử dụng.
 
+Môi trường lần chạy thành công:
+
+```text
+GPU: NVIDIA T4
+CPU: 8
+RAM: 32 GiB
+Timeout: 5400 giây
+Python: 3.11
+Torch: 2.9.1+cu128
+CUDA: 12.8
+Fork commit: 33bfba1
+Volume: duplexomni-smoke-vol-v2
+```
+
+Thời gian editable build khoảng 2861 giây (~47 phút 41 giây). Đây là build môi trường, chưa phải thời gian load hoặc inference model.
+
+### Bước tiếp theo
+
+1. Đối chiếu serving entrypoints và runtime requirements.
+2. Tải checkpoint `MuyeHuang/DuplexOmni` vào persistent volume; không nhúng checkpoint vào image.
+3. Chạy model-load smoke test cho Thinker/Talker và health check.
+4. Chạy baseline BF16 end-to-end bằng input WAV cố định.
+5. Đo VRAM, thời gian load, latency và RTF.
+6. Chỉ sau khi baseline ổn định mới chạy realtime, quantization hoặc giảm số GPU.
+
+## Kết quả triển khai tiếp theo (2026-10-12)
+
+### Phase 2–4 đã hoàn tất
+
+- Checkpoint `MuyeHuang/DuplexOmni` đã tải vào Modal Volume `duplexomni-smoke-vol-v2`, revision `b8a5ff6395ae51460d0402424fbd3359614a901a`, 29 file model, khoảng 70.5 GB.
+- Runtime import đã pass cho `serving_core.server_thinker`, `server_talker` và `server_orchestrator`. Lỗi metadata package được xử lý bằng dist-info shim để vLLM nhận `NvmlCudaPlatform` và `device_type=cuda`.
+- Lần model-load 4-GPU đầu tiên load weights thành công nhưng fail ở FlashAttention vì binary build trên T4 (`sm75`) chạy trên A100 (`sm80`). Việc chỉ set `VLLM_ATTENTION_BACKEND=TRITON_ATTN` không đủ vì multimodal encoder vẫn dùng FlashAttention.
+- Đã rebuild modified vLLM trên 1x A100-80GB với `TORCH_CUDA_ARCH_LIST=8.0`; CMake ghi nhận `-gencode arch=compute_80,code=sm_80`, hoàn tất 369/369 targets và commit artifact vào Volume. Build elapsed khoảng 6546 giây (~109 phút).
+- Model-load smoke sau rebuild đã pass trên 4x A100-80GB: Thinker TP=2 trên GPU 0–1, Talker TP=2 trên GPU 2–3, MTP subprocess trên GPU 3, Orchestrator trên port 21000. Tất cả health 200, `ready_elapsed_seconds=530.6`, không OOM.
+
+Apps: [A100 rebuild](https://modal.com/apps/yennguyen140205/main/ap-uLP70X0agPQCQeEUFepDeV), [model-load success](https://modal.com/apps/yennguyen140205/main/ap-8vfb9CT3XFdvwJNillWCXP).
+
+### Warning còn ghi nhận
+
+- A100 experiment dùng TP=2 + TP=2 để tiết kiệm GPU; chưa phải baseline chính thức 8-GPU TP=4 + TP=4 của upstream.
+- Thinker và MTP có warning dùng default MoE config do thiếu file profile `E=128,N=384`; service vẫn ready nhưng hiệu năng có thể chưa tối ưu.
+- Có warning tokenizer regex và kernel cache directory; không chặn model load, cần xử lý trước benchmark chất lượng/latency.
+
+### Bước tiếp theo trước khi chạy baseline
+
+1. Tạo `baseline_bf16_modal.py`, giữ checkpoint/artifact hiện tại và launcher 4-GPU đã pass.
+2. Gửi một WAV cố định qua `simulate_v8.py` hoặc client chính thức.
+3. Ghi text output, audio output, request latency, first-audio latency và peak VRAM.
+4. Chỉ sau E2E pass mới chạy baseline 8-GPU chính thức, realtime/interruption và quantization.
+
+
+## Kết quả baseline BF16 E2E (2026-10-12)
+
+- Job thành công: [Modal app ap-0h25nzZzuKJZoVzg0yBoB1](https://modal.com/apps/yennguyen140205/main/ap-0h25nzZzuKJZoVzg0yBoB1).
+- Cấu hình: 4x A100-80GB; Thinker TP=2 trên GPU 0–1; Talker TP=2 trên GPU 2–3; MTP subprocess dùng GPU 3; S2 disabled.
+- Input upstream `google_Leda.wav`: mono PCM16, 24 kHz, 220,082 frames (~9.17 giây). Client `simulate_v8.py` đã chạy cold và warm.
+- Cold: request đầu tiên mất 48.78 giây; audio WebSocket đầu tiên đến sau khoảng 50.715 giây; output hợp lệ 2,818,134 bytes, mono PCM16/24 kHz, 1,409,045 frames (~58.71 giây).
+- Warm: request mỗi chunk khoảng 0.24–0.36 giây; audio đầu tiên đến sau khoảng 0.747 giây; output hợp lệ 493,048 bytes, mono PCM16/24 kHz, 246,502 frames (~10.27 giây).
+- ASR text đã nhận được qua các chunk, gồm `The weather is`, `nice and I speak calmly` và phần tiếng Trung; các chunk đều HTTP 200. Audio talker đến qua WebSocket và session được cleanup.
+- VRAM cuối job: GPU0 67,433 MiB; GPU1 78,255 MiB; GPU2 52,393 MiB; GPU3 50,897 MiB. Tổng job 625.7 giây.
+- Lỗi trong run đầu: alias `S1_MODEL_NAME=qwen3-omni` khiến Thinker trả 400; đã sửa thành checkpoint path tuyệt đối và thêm fail-fast khi client có `S1 Error`. Retry sau đó PASS.
+
+### Kết luận hiện tại
+
+Build/import, checkpoint, runtime import, model-load và E2E functional text+audio 4-GPU đã pass. Chưa thể kết luận realtime/RTF cuối vì đây mới là cold/warm functional baseline, MoE profile `E=128,N=384` còn warning default config, và chưa chạy benchmark lặp lại hoặc baseline chính thức 8-GPU. Bước kế tiếp là benchmark có kiểm soát, sau đó realtime interruption và quantization theo plan.
