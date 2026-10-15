@@ -3,6 +3,7 @@ docs/coding_agent_context_prompt_guide.md
 __pycache__/
 *.py[cod]
 .DS_Store
+docs/
 docs/duplexomni_modal_smoke_test_debug.md
 docs/duplexomni_next_steps_research.md
 docs/submission_summary.md
