@@ -6,7 +6,15 @@ Research và thử nghiệm cách chạy inference DuplexOmni, từ việc dựn
 
 ---
 
-## Trạng thái hiện tại (2026-10-12)
+## Trạng thái hiện tại (2026-10-14)
+
+### Architecture hiện tại
+
+- `Phase_2_plan/modal_runtime.py` là module hạ tầng dùng chung: Modal Volume, CUDA/PyTorch runtime image, build image, path checkpoint/source, environment và health helpers.
+- Các job chỉ giữ lifecycle riêng: download, build, import smoke, model-load, batch hoặc realtime.
+- Cấu hình canonical mới bám source/paper: một node `A100-80GB:8`; Thinker TP=4 trên GPU 0–3, Talker TP=4 trên GPU 4–7, MTP chạy trên GPU 7.
+- `model_load_smoke_modal.py` và `realtime_modal.py` là các adapter 8-GPU hiện tại. Chúng chưa được chạy trên workspace mới để tránh tiêu credit.
+- Kết quả 4-GPU bên dưới được giữ như evidence lịch sử, không phải cấu hình canonical mới.
 
 ### Đã hoàn thành
 
@@ -23,7 +31,7 @@ Research và thử nghiệm cách chạy inference DuplexOmni, từ việc dựn
 - [x] Kiểm tra manifest thực tế: 15 safetensors shards, `Qwen3OmniMoeForConditionalGeneration`, BF16, gồm Thinker/Talker/Code2Wav.
 - [x] Runtime import smoke pass cho Thinker, Talker và Orchestrator; sửa metadata shim để vLLM chọn `NvmlCudaPlatform`.
 - [x] Rebuild modified vLLM trên A100 với `TORCH_CUDA_ARCH_LIST=8.0`; 369/369 CUDA/C++ targets và FlashAttention `sm80` đã commit vào Volume.
-- [x] Model-load smoke 4-GPU pass: Thinker/Talker/MTP/Orchestrator đều health 200, elapsed 530.6 giây.
+- [x] Model-load smoke 4-GPU pass lịch sử: Thinker/Talker/MTP/Orchestrator đều health 200, elapsed 530.6 giây.
 - [x] Baseline BF16 E2E 4-GPU pass: cold/warm `simulate_v8.py` đều trả HTTP 200, nhận ASR text và audio WebSocket; job elapsed 625.7 giây.
 
 Evidence:
@@ -33,7 +41,7 @@ Evidence:
 - [`download_model_modal.py`](./download_model_modal.py)
 - [`inspect_model_modal.py`](./inspect_model_modal.py)
 - [`runtime_import_smoke_modal.py`](./runtime_import_smoke_modal.py)
-- [`model_load_smoke_4gpu_modal.py`](./model_load_smoke_4gpu_modal.py)
+- [`model_load_smoke_modal.py`](./model_load_smoke_modal.py) — canonical 8-GPU runner
 - [`rebuild_vllm_a100_modal.py`](./rebuild_vllm_a100_modal.py)
 - [`baseline_bf16_modal.py`](./baseline_bf16_modal.py)
 - Modal app: [ap-hb1KxXToeKEmONPcsJ16jw](https://modal.com/apps/yennguyen140205/main/ap-hb1KxXToeKEmONPcsJ16jw)
@@ -42,9 +50,9 @@ Evidence:
 
 - [x] Đã chạy inference DuplexOmni end-to-end với WAV cố định `google_Leda.wav`.
 - [x] Đã chạy inference DuplexOmni thật ở baseline BF16 4-GPU, gồm cold và warm run.
-- [ ] Chưa chạy benchmark chính thức 8-GPU, realtime interruption hoặc quantization.
+- [ ] Chưa chạy model-load/baseline chính thức 8-GPU trên workspace mới, realtime interruption hoặc quantization.
 
-Build/import smoke, model-load smoke và E2E text/audio 4-GPU đã pass. Chưa có kết luận realtime interruption, benchmark chính thức 8-GPU hoặc quantization.
+Build/import smoke, model-load smoke và E2E text/audio 4-GPU đã pass ở workspace cũ. Workspace mới mới chỉ được chuẩn bị code/config; chưa có kết luận benchmark chính thức 8-GPU, realtime interruption hoặc quantization.
 
 ---
 
@@ -173,7 +181,7 @@ Pass: import được server modules và modified vLLM trong container inference
 
 ### Phase 4 – Model-load smoke trên multi-GPU Modal
 
-**Trạng thái: PASS (experiment 4-GPU, 2026-10-12).** Artifact runtime được rebuild trên A100 `sm80`; cấu hình đã pass Thinker/Talker/MTP/Orchestrator health 200. Baseline chính thức 8-GPU vẫn cần chạy riêng trước benchmark.
+**Trạng thái: PASS lịch sử (experiment 4-GPU, 2026-10-12).** Artifact runtime được rebuild trên A100 `sm80`; cấu hình đã pass Thinker/Talker/MTP/Orchestrator health 200. Baseline chính thức 8-GPU trên workspace mới vẫn cần chạy riêng trước benchmark.
 
 Mục tiêu: chứng minh model load được, tách lỗi load khỏi lỗi request.
 
@@ -213,11 +221,13 @@ Chỉ làm sau Phase 5. Chạy WebSocket bridge/client, kiểm tra streaming aud
 4. Không kết luận cấu hình ít GPU chạy được chỉ vì model load; phải đạt cả output đúng và RTF mục tiêu.
 5. Giữ cùng checkpoint revision, input, sampling config và số lần lặp khi so sánh.
 
-### Các file/job cần tạo hoặc cập nhật
+### Các file/job canonical
 
 - Phase_2_plan/smoke_test_modal.py: chỉ giữ vai trò build/import smoke và pin commit.
 - Phase_2_plan/download_model_modal.py: download/resume/verify checkpoint vào Volume.
-- Phase_2_plan/model_load_smoke_modal.py: import, start services, health polling và log model load.
+- Phase_2_plan/modal_runtime.py: shared infrastructure interface cho mọi Modal job.
+- Phase_2_plan/model_load_smoke_modal.py: official 8-GPU model-load, health polling và cleanup.
+- Phase_2_plan/realtime_modal.py: 8-GPU WebSocket server; microphone client vẫn chạy riêng trên máy local.
 - Phase_2_plan/baseline_bf16_modal.py: full-stack request với WAV cố định và metrics.
 - docs/duplexomni_next_steps_research.md: findings và nguồn tham khảo.
 - Phase_2_plan/duplexomni_inference_plan.md: checklist trạng thái, acceptance criteria và kết quả benchmark.
@@ -603,4 +613,3 @@ DuplexOmni/
 
 > **Tài liệu hướng dẫn triển khai, cài đặt và benchmark chi tiết đầy đủ**:
 > Xem tại [`duplexomni_inference_guide.md`](./duplexomni_inference_guide.md)
-

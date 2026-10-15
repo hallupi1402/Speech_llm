@@ -11,48 +11,21 @@ from pathlib import Path
 
 import modal
 
+from modal_runtime import (
+    CPU_COUNT,
+    VLLM_DIR,
+    WORKSPACE,
+    build_image,
+    get_volume,
+)
+
 
 APP_NAME = "duplexomni-vllm-rebuild-a100"
-VOLUME_NAME = "duplexomni-smoke-vol-v2"
-WORKSPACE = Path("/root/workspace")
 REPO_DIR = WORKSPACE / "DuplexOmni"
-VLLM_DIR = REPO_DIR / "inference_framework" / "vllm_qwen3_omni"
 
 app = modal.App(APP_NAME)
-volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=False)
-
-image = (
-    modal.Image.from_registry("nvidia/cuda:12.8.1-devel-ubuntu22.04", add_python="3.11")
-    .entrypoint([])
-    .env(
-        {
-            "CUDA_HOME": "/usr/local/cuda",
-            "CUDA_PATH": "/usr/local/cuda",
-            "VLLM_TARGET_DEVICE": "cuda",
-            "TORCH_CUDA_ARCH_LIST": "8.0",
-            "MAX_JOBS": "4",
-            "VERBOSE": "1",
-            "NINJA_STATUS": "[%f/%t %o/sec] ",
-        }
-    )
-    .apt_install("git", "git-lfs", "build-essential", "cmake", "ninja-build", "ffmpeg", "libsndfile1")
-    .pip_install(
-        "torch==2.9.1",
-        "torchaudio==2.9.1",
-        "torchvision==0.24.1",
-        "cmake>=3.26.1",
-        "ninja",
-        "packaging>=24.2",
-        "setuptools>=77.0.3,<81.0.0",
-        "setuptools-scm>=8",
-        "wheel",
-        "jinja2>=3.1.6",
-        "regex",
-        "build",
-        "protobuf>=5.29.6",
-        "grpcio-tools==1.78.0",
-    )
-)
+volume = get_volume()
+image = build_image()
 
 
 def run_checked(command: list[str], *, cwd: Path | None = None, env: dict[str, str] | None = None) -> None:
@@ -118,7 +91,7 @@ def prepare_env() -> dict[str, str]:
 @app.function(
     image=image,
     gpu="A100-80GB",
-    cpu=8,
+    cpu=CPU_COUNT // 4,
     memory=32 * 1024,
     timeout=4 * 60 * 60,
     startup_timeout=20 * 60,

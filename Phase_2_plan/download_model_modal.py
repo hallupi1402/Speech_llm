@@ -14,16 +14,15 @@ from pathlib import Path
 
 import modal
 
+from modal_runtime import MODEL_ROOT, VOLUME_NAME, get_volume
+
 
 APP_NAME = "duplexomni-model-download"
-VOLUME_NAME = "duplexomni-smoke-vol-v2"
-WORKSPACE = Path("/root/workspace")
 MODEL_ID = "MuyeHuang/DuplexOmni"
-MODEL_ROOT = WORKSPACE / "models" / "DuplexOmni"
-MANIFEST_PATH = WORKSPACE / "models" / "duplexomni_model_manifest.json"
+MANIFEST_PATH = MODEL_ROOT.parent / "duplexomni_model_manifest.json"
 
 app = modal.App(APP_NAME)
-volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
+volume = get_volume(create_if_missing=True)
 
 image = (
     modal.Image.debian_slim(python_version="3.11")

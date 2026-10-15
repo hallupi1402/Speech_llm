@@ -15,15 +15,12 @@ from pathlib import Path
 
 import modal
 
+from modal_runtime import REPO_DIR, VLLM_DIR, VOLUME_NAME, get_volume
+
 
 APP_NAME = "duplexomni-vllm-smoke-test"
-VOLUME_NAME = "duplexomni-smoke-vol-v2"
-WORKSPACE = Path("/root/workspace")
-REPO_DIR = WORKSPACE / "DuplexOmni"
-VLLM_DIR = REPO_DIR / "inference_framework" / "vllm_qwen3_omni"
-
 app = modal.App(APP_NAME)
-volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
+volume = get_volume(create_if_missing=True)
 
 
 # Keep the compiler/toolkit and the Torch CUDA build on the same CUDA major
@@ -71,6 +68,7 @@ image = (
         "protobuf>=5.29.6",
         "grpcio-tools==1.78.0",
     )
+    .add_local_python_source("modal_runtime")
 )
 
 
