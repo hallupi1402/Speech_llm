@@ -15,6 +15,7 @@ import modal
 
 from modal_runtime import (
     GPU_SPEC,
+    INFERENCE_CPU_COUNT,
     MEMORY_MIB,
     MODEL_ROOT,
     REALTIME_PORT,
@@ -74,7 +75,7 @@ def _terminate(processes: list[subprocess.Popen[str]]) -> None:
 @app.function(
     image=image,
     gpu=GPU_SPEC,
-    cpu=32,
+    cpu=INFERENCE_CPU_COUNT,
     memory=MEMORY_MIB,
     timeout=24 * 60 * 60,
     startup_timeout=STARTUP_TIMEOUT_SECONDS,

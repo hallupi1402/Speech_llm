@@ -15,6 +15,7 @@ import modal
 
 from modal_runtime import (
     GPU_SPEC,
+    INFERENCE_CPU_COUNT,
     JOB_TIMEOUT_SECONDS,
     MEMORY_MIB,
     MODEL_ROOT,
@@ -60,7 +61,7 @@ def _drain_logs(offsets: dict[Path, int]) -> None:
 @app.function(
     image=image,
     gpu=GPU_SPEC,
-    cpu=32,
+    cpu=INFERENCE_CPU_COUNT,
     memory=MEMORY_MIB,
     timeout=JOB_TIMEOUT_SECONDS,
     startup_timeout=STARTUP_TIMEOUT_SECONDS,

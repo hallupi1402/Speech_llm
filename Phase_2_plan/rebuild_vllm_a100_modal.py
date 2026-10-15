@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -12,16 +13,17 @@ from pathlib import Path
 import modal
 
 from modal_runtime import (
-    CPU_COUNT,
+    BUILD_CPU_COUNT,
+    BUILD_MAX_JOBS,
+    REPO_DIR,
     VLLM_DIR,
-    WORKSPACE,
     build_image,
     get_volume,
 )
 
 
 APP_NAME = "duplexomni-vllm-rebuild-a100"
-REPO_DIR = WORKSPACE / "DuplexOmni"
+BUILD_MARKER = VLLM_DIR / ".duplexomni_a100_build.json"
 
 app = modal.App(APP_NAME)
 volume = get_volume()
@@ -50,6 +52,22 @@ def clean_build_outputs() -> None:
     (VLLM_DIR / "vllm" / "vllm_flash_attn").mkdir(parents=True, exist_ok=True)
 
 
+def source_revision() -> str:
+    return subprocess.check_output(
+        ["git", "-C", str(REPO_DIR), "rev-parse", "--short", "HEAD"], text=True
+    ).strip()
+
+
+def has_current_build(revision: str) -> bool:
+    if not BUILD_MARKER.is_file():
+        return False
+    try:
+        marker = json.loads(BUILD_MARKER.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    return marker == {"source_revision": revision, "cuda_arch": "sm80"}
+
+
 def prepare_env() -> dict[str, str]:
     import torch
 
@@ -64,9 +82,7 @@ def prepare_env() -> dict[str, str]:
     if (device.major, device.minor) != (8, 0):
         raise RuntimeError(f"Expected A100 sm80, got sm{device.major}{device.minor}")
     env = os.environ.copy()
-    revision = subprocess.check_output(
-        ["git", "-C", str(REPO_DIR), "rev-parse", "--short", "HEAD"], text=True
-    ).strip()
+    revision = source_revision()
     cuda_home = Path("/usr/local/cuda")
     env.update(
         {
@@ -75,7 +91,7 @@ def prepare_env() -> dict[str, str]:
             "VLLM_TARGET_DEVICE": "cuda",
             "TORCH_CUDA_ARCH_LIST": "8.0",
             "SETUPTOOLS_SCM_PRETEND_VERSION": f"0.0.0+duplexomni.{revision}",
-            "MAX_JOBS": "4",
+            "MAX_JOBS": str(BUILD_MAX_JOBS),
             "CMAKE_ARGS": f"-DCUDA_TOOLKIT_ROOT_DIR={cuda_home} -DCMAKE_CUDA_COMPILER={cuda_home / 'bin' / 'nvcc'}",
         }
     )
@@ -91,7 +107,7 @@ def prepare_env() -> dict[str, str]:
 @app.function(
     image=image,
     gpu="A100-80GB",
-    cpu=CPU_COUNT // 4,
+    cpu=BUILD_CPU_COUNT,
     memory=32 * 1024,
     timeout=4 * 60 * 60,
     startup_timeout=20 * 60,
@@ -101,6 +117,13 @@ def rebuild_vllm_a100() -> None:
     print("[phase:a100-rebuild] start", flush=True)
     if not VLLM_DIR.is_dir():
         raise RuntimeError(f"Missing vLLM source: {VLLM_DIR}")
+    revision = source_revision()
+    if has_current_build(revision):
+        print(
+            f"[phase:a100-rebuild] existing_build=valid revision={revision}; skipping rebuild",
+            flush=True,
+        )
+        return
     env = prepare_env()
     clean_build_outputs()
     requirements = VLLM_DIR / "requirements" / "build.txt"
@@ -109,6 +132,10 @@ def rebuild_vllm_a100() -> None:
         [sys.executable, "-m", "pip", "install", "-v", "--no-build-isolation", "--no-deps", "-e", "."],
         cwd=VLLM_DIR,
         env=env,
+    )
+    BUILD_MARKER.write_text(
+        json.dumps({"source_revision": revision, "cuda_arch": "sm80"}) + "\n",
+        encoding="utf-8",
     )
     volume.commit()
     print("[phase:a100-rebuild] committed_architecture_specific_artifacts", flush=True)

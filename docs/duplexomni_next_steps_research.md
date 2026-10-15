@@ -148,7 +148,7 @@ Không coi model load thành công là đủ; cấu hình chỉ được chấp 
 
 ## Trạng thái sau khi triển khai
 
-Research note này mô tả kế hoạch trước khi chạy model. Đến 2026-10-12, checkpoint, model-load smoke 4-GPU và baseline BF16 E2E đã hoàn thành; xem `Phase_2_plan/duplexomni_inference_plan.md` và `docs/duplexomni_modal_smoke_test_debug.md` để biết số liệu thực tế.
+Research note này mô tả kế hoạch trước khi chạy model. Đến 2026-10-12, checkpoint, model-load smoke 4-GPU và baseline BF16 E2E đã hoàn thành; xem `docs/duplexomni_inference_plan.md` và `docs/duplexomni_modal_smoke_test_debug.md` để biết số liệu thực tế.
 
 ## Phạm vi của bước kế tiếp ngay lập tức
 

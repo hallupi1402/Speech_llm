@@ -3,16 +3,14 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 
 import modal
 
-from modal_runtime import MODEL_ROOT, VOLUME_NAME, get_volume
+from modal_runtime import MODEL_MANIFEST_PATH, MODEL_ROOT, get_volume
 
 
 APP_NAME = "duplexomni-model-inspect"
-MANIFEST_PATH = Path("/root/workspace/models/duplexomni_model_manifest.json")
 
 app = modal.App(APP_NAME)
 volume = get_volume()
@@ -47,10 +45,10 @@ def inspect_model() -> None:
     print(f"[phase:model-inspect] model_root={MODEL_ROOT}", flush=True)
     if not MODEL_ROOT.is_dir():
         raise RuntimeError(f"Missing model directory: {MODEL_ROOT}")
-    if not MANIFEST_PATH.is_file():
-        raise RuntimeError(f"Missing manifest: {MANIFEST_PATH}")
+    if not MODEL_MANIFEST_PATH.is_file():
+        raise RuntimeError(f"Missing manifest: {MODEL_MANIFEST_PATH}")
 
-    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    manifest = json.loads(MODEL_MANIFEST_PATH.read_text(encoding="utf-8"))
     print(f"[phase:model-inspect] manifest_revision={manifest['model_revision']}", flush=True)
     print(f"[phase:model-inspect] manifest_files={manifest['file_count']}", flush=True)
     print(f"[phase:model-inspect] manifest_bytes={manifest['total_bytes']}", flush=True)

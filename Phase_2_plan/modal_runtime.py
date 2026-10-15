@@ -26,6 +26,8 @@ VLLM_DIR = REPO_DIR / "inference_framework" / "vllm_qwen3_omni"
 SERVING_DIR = REPO_DIR / "inference_framework" / "realtime_serving"
 CORE_DIR = SERVING_DIR / "serving_core"
 MODEL_ROOT = WORKSPACE / "models" / "DuplexOmni"
+MODEL_ID = "MuyeHuang/DuplexOmni"
+MODEL_MANIFEST_PATH = MODEL_ROOT.parent / "duplexomni_model_manifest.json"
 VLLM_VERSION = "0.0.0+duplexomni.33bfba1"
 
 THINKER_PORT = 19999
@@ -36,7 +38,9 @@ REALTIME_PORT = 8765
 # Official source layout: Thinker TP=4 on GPUs 0-3 and Talker TP=4 on GPUs
 # 4-7, with the Talker MTP subprocess sharing the final Talker GPU.
 GPU_SPEC = "A100-80GB:8"
-CPU_COUNT = 32
+INFERENCE_CPU_COUNT = 32
+BUILD_CPU_COUNT = 8
+BUILD_MAX_JOBS = 4
 MEMORY_MIB = 128 * 1024
 JOB_TIMEOUT_SECONDS = 4 * 60 * 60
 STARTUP_TIMEOUT_SECONDS = 20 * 60
@@ -89,7 +93,7 @@ def build_image() -> modal.Image:
                 "CUDA_PATH": "/usr/local/cuda",
                 "VLLM_TARGET_DEVICE": "cuda",
                 "TORCH_CUDA_ARCH_LIST": "8.0",
-                "MAX_JOBS": "4",
+                "MAX_JOBS": str(BUILD_MAX_JOBS),
                 "VERBOSE": "1",
                 "NINJA_STATUS": "[%f/%t %o/sec] ",
             }

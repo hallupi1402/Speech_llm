@@ -14,11 +14,9 @@ Smoke test hiện tại **chưa** kiểm tra:
 
 File smoke test:
 
-```text
-Phase_2_plan /smoke_test_modal.py
-```
+`Phase_2_plan/smoke_test_modal.py`
 
-Lưu ý: thư mục `Phase_2_plan ` có một dấu cách ở cuối tên. Khi chạy command phải giữ nguyên dấu cách và nên quote path.
+Các log ban đầu có một path cũ bị ghi thêm dấu cách sau tên thư mục. Cấu trúc hiện tại dùng `Phase_2_plan/` bình thường; các lệnh bên dưới là lệnh canonical.
 
 ## 2. Lỗi ban đầu
 
@@ -220,7 +218,7 @@ commit Modal Volume
 ### 6.1. Kiểm tra cục bộ
 
 ```bash
-./.venv/bin/python -m py_compile './Phase_2_plan /smoke_test_modal.py'
+./.venv/bin/python -m py_compile Phase_2_plan/smoke_test_modal.py
 ```
 
 Kết quả: pass.
@@ -267,10 +265,10 @@ Không có traceback CMake mới. Kết luận hiện tại là build đã qua l
 Từ root repo:
 
 ```bash
-./.venv/bin/modal run './Phase_2_plan /smoke_test_modal.py'
+./.venv/bin/modal run Phase_2_plan/smoke_test_modal.py
 ```
 
-Theo dõi app/log trên Modal bằng app ID của lần chạy tương ứng. Không dùng unquoted path vì tên thư mục có trailing space.
+Theo dõi app/log trên Modal bằng app ID của lần chạy tương ứng.
 
 ## 8. Checklist debug nếu chạy lại vẫn fail
 

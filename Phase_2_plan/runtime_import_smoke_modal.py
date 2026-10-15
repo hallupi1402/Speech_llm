@@ -13,10 +13,10 @@ from pathlib import Path
 import modal
 
 from modal_runtime import (
+    ensure_vllm_metadata,
     REPO_DIR,
     SERVING_DIR,
     VLLM_DIR,
-    VLLM_VERSION,
     get_volume,
     runtime_image,
 )
@@ -28,21 +28,6 @@ SERVING_CORE_DIR = SERVING_DIR / "serving_core"
 app = modal.App(APP_NAME)
 volume = get_volume()
 image = runtime_image()
-
-
-def _ensure_vllm_metadata() -> None:
-    """Expose the persisted source artifact as an installed distribution."""
-
-    dist_info = VLLM_DIR / f"vllm-{VLLM_VERSION}.dist-info"
-    dist_info.mkdir(parents=True, exist_ok=True)
-    (dist_info / "METADATA").write_text(
-        "Metadata-Version: 2.1\n"
-        "Name: vllm\n"
-        f"Version: {VLLM_VERSION}\n",
-        encoding="utf-8",
-    )
-    (dist_info / "top_level.txt").write_text("vllm\n", encoding="utf-8")
-    (dist_info / "RECORD").write_text("", encoding="utf-8")
 
 
 @app.function(
@@ -64,7 +49,7 @@ def run_import_smoke() -> None:
     sys.path.insert(0, str(SERVING_CORE_DIR))
     os.environ["VLLM_TARGET_DEVICE"] = "cuda"
     os.environ["VLLM_ROOT"] = str(VLLM_DIR)
-    _ensure_vllm_metadata()
+    ensure_vllm_metadata()
     volume.commit()
 
     import torch

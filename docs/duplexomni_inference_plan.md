@@ -230,7 +230,7 @@ Chỉ làm sau Phase 5. Chạy WebSocket bridge/client, kiểm tra streaming aud
 - Phase_2_plan/realtime_modal.py: 8-GPU WebSocket server; microphone client vẫn chạy riêng trên máy local.
 - Phase_2_plan/baseline_bf16_modal.py: full-stack request với WAV cố định và metrics.
 - docs/duplexomni_next_steps_research.md: findings và nguồn tham khảo.
-- Phase_2_plan/duplexomni_inference_plan.md: checklist trạng thái, acceptance criteria và kết quả benchmark.
+- docs/duplexomni_inference_plan.md: checklist trạng thái, acceptance criteria và kết quả benchmark.
 
 Không sửa start_thinker_talker_stack.sh để giảm GPU trước khi baseline chính thức chạy; nếu cần cấu hình TP nhỏ hơn, tạo một experiment config riêng để giữ nguyên baseline.
 

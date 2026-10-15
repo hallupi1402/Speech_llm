@@ -14,12 +14,10 @@ from pathlib import Path
 
 import modal
 
-from modal_runtime import MODEL_ROOT, VOLUME_NAME, get_volume
+from modal_runtime import MODEL_ID, MODEL_MANIFEST_PATH, MODEL_ROOT, VOLUME_NAME, get_volume
 
 
 APP_NAME = "duplexomni-model-download"
-MODEL_ID = "MuyeHuang/DuplexOmni"
-MANIFEST_PATH = MODEL_ROOT.parent / "duplexomni_model_manifest.json"
 
 app = modal.App(APP_NAME)
 volume = get_volume(create_if_missing=True)
@@ -59,8 +57,8 @@ def _write_manifest(
             for path in files
         ],
     }
-    MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
-    MANIFEST_PATH.write_text(
+    MODEL_MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
+    MODEL_MANIFEST_PATH.write_text(
         json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
@@ -113,7 +111,7 @@ def download_model() -> None:
         completed_at=completed,
         files=files,
     )
-    manifest_size = MANIFEST_PATH.stat().st_size
+    manifest_size = MODEL_MANIFEST_PATH.stat().st_size
     total_bytes = sum(path.stat().st_size for path in files)
     print(f"[phase:model-download] files={len(files)}", flush=True)
     print(f"[phase:model-download] total_bytes={total_bytes}", flush=True)
