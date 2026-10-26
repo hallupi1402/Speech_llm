@@ -4,6 +4,8 @@ __pycache__/
 *.py[cod]
 .DS_Store
 docs/
+!research_personaplex/docs/
+!research_personaplex/docs/**
 docs/duplexomni_modal_smoke_test_debug.md
 docs/duplexomni_next_steps_research.md
 docs/submission_summary.md
