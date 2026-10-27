@@ -7,12 +7,12 @@ adapters, smoke tests, evidence, and reports.
 
 ## What is implemented
 
-- Shared Modal infrastructure in [`Phase_2_plan/modal_runtime.py`](Phase_2_plan/modal_runtime.py): Volume, paths, CUDA images, runtime environment, GPU layout, and health helpers.
-- Source/bootstrap and artifact jobs: [`prepare_source_modal.py`](Phase_2_plan/prepare_source_modal.py), [`download_model_modal.py`](Phase_2_plan/download_model_modal.py), and [`inspect_model_modal.py`](Phase_2_plan/inspect_model_modal.py).
-- Modified-vLLM build and import validation: [`rebuild_vllm_a100_modal.py`](Phase_2_plan/rebuild_vllm_a100_modal.py), [`smoke_test_modal.py`](Phase_2_plan/smoke_test_modal.py), and [`runtime_import_smoke_modal.py`](Phase_2_plan/runtime_import_smoke_modal.py).
-- Canonical 8-GPU service adapters: [`model_load_smoke_modal.py`](Phase_2_plan/model_load_smoke_modal.py) and [`realtime_modal.py`](Phase_2_plan/realtime_modal.py).
-- Historical 4-GPU BF16 WAV evidence: [`baseline_bf16_modal.py`](Phase_2_plan/baseline_bf16_modal.py) and [`Phase_2_plan/evidence/`](Phase_2_plan/evidence/).
-- Local microphone/WebSocket clients are separate from the Modal model server; see [`omni_realtime_mac_client.py`](Phase_2_plan/omni_realtime_mac_client.py).
+- Shared Modal infrastructure in [`Phase_2_plan_inference/modal_runtime.py`](Phase_2_plan_inference/modal_runtime.py): Volume, paths, CUDA images, runtime environment, GPU layout, and health helpers.
+- Source/bootstrap and artifact jobs: [`prepare_source_modal.py`](Phase_2_plan_inference/prepare_source_modal.py), [`download_model_modal.py`](Phase_2_plan_inference/download_model_modal.py), and [`inspect_model_modal.py`](Phase_2_plan_inference/inspect_model_modal.py).
+- Modified-vLLM build and import validation: [`rebuild_vllm_a100_modal.py`](Phase_2_plan_inference/rebuild_vllm_a100_modal.py), [`smoke_test_modal.py`](Phase_2_plan_inference/smoke_test_modal.py), and [`runtime_import_smoke_modal.py`](Phase_2_plan_inference/runtime_import_smoke_modal.py).
+- Canonical 8-GPU service adapters: [`model_load_smoke_modal.py`](Phase_2_plan_inference/model_load_smoke_modal.py) and [`realtime_modal.py`](Phase_2_plan_inference/realtime_modal.py).
+- Historical 4-GPU BF16 WAV evidence: [`baseline_bf16_modal.py`](Phase_2_plan_inference/baseline_bf16_modal.py) and [`Phase_2_plan_inference/evidence/`](Phase_2_plan_inference/evidence/).
+- Local microphone/WebSocket clients are separate from the Modal model server; see [`omni_realtime_mac_client.py`](Phase_2_plan_inference/omni_realtime_mac_client.py).
 
 ## Execution order
 
@@ -20,12 +20,12 @@ Run commands from the repository root with the intended Modal profile active:
 
 ```bash
 ./.venv/bin/modal profile activate modal-new
-./.venv/bin/modal run Phase_2_plan/prepare_source_modal.py
-./.venv/bin/modal run Phase_2_plan/download_model_modal.py
-./.venv/bin/modal run Phase_2_plan/inspect_model_modal.py
-./.venv/bin/modal run Phase_2_plan/rebuild_vllm_a100_modal.py
-./.venv/bin/modal run Phase_2_plan/runtime_import_smoke_modal.py
-./.venv/bin/modal run Phase_2_plan/model_load_smoke_modal.py
+./.venv/bin/modal run Phase_2_plan_inference/prepare_source_modal.py
+./.venv/bin/modal run Phase_2_plan_inference/download_model_modal.py
+./.venv/bin/modal run Phase_2_plan_inference/inspect_model_modal.py
+./.venv/bin/modal run Phase_2_plan_inference/rebuild_vllm_a100_modal.py
+./.venv/bin/modal run Phase_2_plan_inference/runtime_import_smoke_modal.py
+./.venv/bin/modal run Phase_2_plan_inference/model_load_smoke_modal.py
 ```
 
 The vLLM build is isolated from inference. It uses CUDA 12.8 devel, Python
@@ -34,7 +34,7 @@ successful build writes a marker into the Volume, so a later run can skip the
 same source revision instead of compiling again.
 
 For the persistent realtime endpoint, use `modal serve` with
-`Phase_2_plan/realtime_modal.py`, then connect from the local client. Do not
+`Phase_2_plan_inference/realtime_modal.py`, then connect from the local client. Do not
 run the microphone client inside the GPU container.
 
 ## Current status
