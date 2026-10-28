@@ -1,12 +1,19 @@
 # Upstream source
 
-Clone NVIDIA's official PersonaPlex repository into `upstream/personaplex/`
-when ready. Keep local research changes outside this directory, and record the
-upstream URL, branch/tag, exact commit, and any patches here. The model weights
-are gated artifacts and should remain in the Hugging Face/Modal cache, not in
-this checkout.
+The NVIDIA PersonaPlex repository is cloned into `upstream/personaplex/` for
+local source reading. Keep local research changes outside this directory, and
+record the upstream URL, branch/tag, exact commit, and any patches here. The
+model weights are gated artifacts and should remain in the Hugging Face/remote
+GPU cache, not in this checkout.
 
-Expected source layout after clone:
+## Current local checkout
+
+- Repository: `https://github.com/NVIDIA/personaplex`
+- Commit: `3428dfd95309a7f3c84fd93259ded0f810d1ff91`
+- Commit subject: `Update README.md`
+- Local checkout is currently clean; treat it as read-only source for tracing.
+
+Key paths in this checkout:
 
 ```text
 upstream/personaplex/

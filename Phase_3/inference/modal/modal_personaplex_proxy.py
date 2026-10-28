@@ -10,14 +10,16 @@ The local server binds to loopback so the token is not exposed as a public servi
 from __future__ import annotations
 
 import asyncio
+import os
 from getpass import getpass
 
 from aiohttp import ClientSession, ClientTimeout, WSMsgType, web
 
 
-REMOTE_BASE = (
-    "https://hyennguyen140205--personaplex-serve-personaplex.us-east.modal.run"
-)
+REMOTE_BASE = os.environ.get(
+    "PERSONAPLEX_MODAL_URL",
+    "https://hyennguyen140205--personaplex-serve-personaplex.us-east.modal.run",
+).rstrip("/")
 LOCAL_HOST = "127.0.0.1"
 LOCAL_PORT = 8765
 HOP_BY_HOP_HEADERS = {

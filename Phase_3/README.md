@@ -3,19 +3,19 @@
 Phase 3 is the research workspace for understanding the PersonaPlex backbone,
 reproducing its inference behavior, and then evaluating post-training ideas for
 P1–P3. Model execution and training are intended to run on Modal GPUs. This
-checkout currently contains the Modal inference adapters and the planned code
-layout; the NVIDIA source and model weights are not copied into this repository.
+checkout contains the Modal inference adapters, a local NVIDIA source checkout
+for reading, and the planned code layout. Model weights remain remote.
 
 ## Current state
 
 - `inference/modal/` contains the inference adapter and local authenticated
   WebSocket proxy copied from Phase 2.
-- `upstream/personaplex/` is reserved for the pinned NVIDIA source checkout.
-  Clone it here after choosing a commit; record the commit in
-  `upstream/README.md`.
+- `upstream/personaplex/` contains the local NVIDIA source checkout for reading
+  only. The parent repo ignores this nested checkout; its current commit is
+  recorded in `upstream/README.md`.
 - `src/phase3/` reserves modules for scenarios, rollouts, rewards, training,
-  and evaluation. These are design placeholders until the upstream source has
-  been read and the experiment interfaces are settled.
+  and evaluation. These are design placeholders until the experiment
+  interfaces are settled.
 - `data/` and `runs/` hold manifests and run metadata. Keep gated weights,
   credentials, and large/private audio out of Git.
 
@@ -23,11 +23,15 @@ layout; the NVIDIA source and model weights are not copied into this repository.
 
 1. [`docs/architecture-and-code-reading.md`](docs/architecture-and-code-reading.md)
    — model components and upstream code path.
-2. [`inference/modal/README.md`](inference/modal/README.md) — current Modal
+2. [`docs/personaplex_source_reading_guide.md`](docs/personaplex_source_reading_guide.md)
+   — entry points, call chains, and exact upstream line ranges.
+3. [`docs/personaplex_architecture_slides.html`](docs/personaplex_architecture_slides.html)
+   — standalone 16:9 slide deck with the architecture and code map.
+4. [`inference/modal/README.md`](inference/modal/README.md) — current Modal
    adapter behavior and limitations.
-3. [`docs/experiment-design.md`](docs/experiment-design.md) — planned test
+5. [`docs/experiment-design.md`](docs/experiment-design.md) — planned test
    structure for P1–P3 and the RL path.
-4. After cloning upstream, inspect `moshi/server.py`, `moshi/offline.py`,
+5. Inspect `moshi/server.py`, `moshi/offline.py`,
    `moshi/models/loaders.py`, `moshi/models/lm.py`, then the streaming and
    transformer modules. Follow the inference call chain before making patches.
 

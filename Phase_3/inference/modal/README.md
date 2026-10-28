@@ -12,6 +12,23 @@ scenario-in/scored-rollout-out interface. Build that interface in
 `src/phase3/rollout/` after the upstream offline and streaming APIs have been
 inspected.
 
+## Temporary PersonaPlex preview
+
+The current development endpoint is
+`https://hyennguyen140205--personaplex-serve-personaplex-dev.us-east.modal.run`.
+It requires Modal proxy credentials. To open the upstream UI through a
+loopback-only local proxy, run from the repository root:
+
+```bash
+PERSONAPLEX_MODAL_URL=https://hyennguyen140205--personaplex-serve-personaplex-dev.us-east.modal.run \
+  .venv/bin/python Phase_3/inference/modal/modal_personaplex_proxy.py
+```
+
+Enter your Modal Proxy Token ID and Secret when prompted, then open
+`http://127.0.0.1:8765`. The proxy binds to loopback and forwards both the UI
+and `/api/chat` WebSocket traffic to the protected dev endpoint. Do not paste
+the token values into chat or save them in a file.
+
 Before using it for controlled experiments:
 
 - Pin the upstream source revision. The copied adapter currently does a shallow
