@@ -8,6 +8,8 @@ docs/
 !research_personaplex/docs/**
 !Phase_2_plan_inference/research_personaplex/docs/
 !Phase_2_plan_inference/research_personaplex/docs/**
+!/Phase_3/docs/
+!/Phase_3/docs/**
 docs/duplexomni_modal_smoke_test_debug.md
 docs/duplexomni_next_steps_research.md
 docs/submission_summary.md
