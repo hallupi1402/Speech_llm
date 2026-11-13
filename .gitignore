@@ -11,6 +11,12 @@ docs/
 !/Phase_3/docs/
 !/Phase_3/docs/**
 /Phase_3/upstream/personaplex/
+/Phase_3/upstream/dsb-ifeval/
+/Phase_3/runs/*
+!/Phase_3/runs/README.md
+/Phase_3/data/p03/audio/
+/Phase_3/data/p03/dsb_pilot_subset/audio/
+/Phase_3/data/external/
 docs/duplexomni_modal_smoke_test_debug.md
 docs/duplexomni_next_steps_research.md
 docs/submission_summary.md

@@ -28,11 +28,10 @@ engineer reward prompts or thresholds.
 ```text
 inference/modal/           serving adapter copied from Phase 2
 upstream/personaplex/      pinned NVIDIA checkout; no research edits initially
-src/phase3/scenarios/      scenario schema, loading, validation, split checks
-src/phase3/rollout/        common backend interface and PersonaPlex adapter
-src/phase3/rewards/        task-specific verifiers and reward aggregation
-src/phase3/training/       LoRA/GRPO orchestration and Modal jobs
-src/phase3/evaluation/     metrics, human audit export, reports
+src/phase3/scenarios/      P03 paired scenario schema, loading, validation
+src/phase3/rollout/        PersonaPlex WebSocket replay and output capture
+src/phase3/scoring/        provisional P03 audio-timing metrics
+src/phase3/training/       reserved; no trainer until reward and rollout gates pass
 configs/                   versioned run/training/evaluation configuration
 data/                      manifests and pointers; large/private audio external
 runs/                      metadata and logs; artifacts external where needed
@@ -52,9 +51,10 @@ Recommended interfaces (final types depend on upstream inspection):
 - A **trainer** consumes grouped rollouts and rewards and emits an adapter or
   checkpoint plus training metadata. Keep the frozen baseline path unchanged.
 
-These are design contracts, not implemented interfaces yet. Confirm them after
-reading the pinned model code, especially whether the rollout route supports
-causal replay and whether gradients/log-probabilities can be recovered.
+The P03 scenario loader, WebSocket rollout, screening metrics, and manual review
+gate are implemented. P1/P2 verifiers and a trainer remain future work. The
+current upstream WebSocket replays audio causally but does not expose sampled
+token log-probabilities, so it is not sufficient by itself for GRPO updates.
 
 ## Reward/verifier validation before RL
 

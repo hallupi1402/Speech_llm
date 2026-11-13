@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PersonaPlex — Architecture & source map</title>
+    <title>PersonaPlex — Research progress</title>
     <style>
       :root {
         color-scheme: dark;
@@ -65,6 +65,20 @@
       .map-card code { color: var(--accent); font-size: .96em; }
       .callout { position: absolute; left: 4.2%; right: 4.2%; bottom: 1.2%; color: #d6e1ed; font-size: clamp(9px, .76vw, 12px); text-align: center; }
       .progress { position: absolute; bottom: 0; left: 0; height: 3px; width: 50%; background: linear-gradient(90deg, var(--cyan), var(--blue)); transition: width .25s ease; }
+      .content-slide h1 { max-width: 84%; font-size: clamp(22px, 2.6vw, 40px); }
+      .content-grid { position: absolute; inset: 25% 4.2% 8%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      .content-grid.three-up { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .content-card { min-width: 0; padding: clamp(12px, 1.5vw, 22px); border: 1px solid #31445e; border-top: 3px solid var(--accent, var(--cyan)); border-radius: 14px; background: linear-gradient(130deg, #17243a, #101a2a); }
+      .content-card h2 { margin: 0 0 10px; color: var(--accent, var(--cyan)); font-size: clamp(14px, 1.35vw, 20px); }
+      .content-card p, .content-card li { color: #d0dbea; font-size: clamp(11px, 1vw, 15px); line-height: 1.48; }
+      .content-card p { margin: 0 0 9px; }
+      .content-card ul { margin: 0; padding-left: 1.15em; }
+      .content-card li + li { margin-top: 6px; }
+      .content-card strong { color: var(--text); }
+      .content-card .metric { color: var(--amber); font-weight: 800; font-size: clamp(20px, 2vw, 30px); letter-spacing: -.03em; }
+      .content-card .source { color: #94a9c3; font-size: clamp(9px, .76vw, 12px); margin-top: 10px; }
+      .content-card .source a { color: inherit; }
+      .slide-foot { position: absolute; left: 4.2%; right: 4.2%; bottom: 3.1%; color: #91a5bd; font-size: clamp(9px, .75vw, 12px); }
       /* Keep the architecture diagram below its heading instead of painting over it. */
       .architecture-slide h1 { max-width: 84%; font-size: clamp(22px, 2.5vw, 40px); }
       .architecture-slide .diagram { top: 26%; height: 65%; }
@@ -72,6 +86,10 @@
         .slide { padding-top: 7%; }
         .architecture-slide .diagram { top: 30%; height: 61%; }
         .architecture-slide h1 { max-width: 100%; font-size: clamp(20px, 4vw, 30px); }
+        .content-slide h1 { max-width: 100%; font-size: clamp(20px, 4vw, 30px); }
+        .content-grid { inset: 29% 4.2% 8%; gap: 7px; }
+        .content-card { padding: 8px; }
+        .content-card li + li { margin-top: 3px; }
         .map-grid { inset-top: 23%; gap: 6px; }
         .map-card { padding: 7px; }
         .map-card p { font-size: 9px; }
@@ -80,13 +98,123 @@
     </style>
   </head>
   <body>
-    <main class="deck" aria-label="PersonaPlex architecture slide deck">
+    <main class="deck" aria-label="PersonaPlex research presentation">
       <nav class="controls" aria-label="Điều khiển slide">
         <button id="prev" aria-label="Slide trước">←</button>
         <span class="counter" id="counter">1 / 2</span>
         <button id="next" aria-label="Slide tiếp">→</button>
         <button id="full" aria-label="Toàn màn hình">⛶</button>
       </nav>
+
+      <section class="slide content-slide" aria-label="Tổng quan hành trình nghiên cứu">
+        <div class="eyebrow">Research progress · PersonaPlex</div>
+        <h1>Từ thử inference đến câu hỏi nghiên cứu</h1>
+        <p class="subtitle">Ba chặng công việc: khảo sát mô hình, đối chiếu bằng chứng nghiên cứu và xây pilot để kiểm chứng một hành vi cụ thể.</p>
+        <div class="content-grid three-up">
+          <article class="content-card" style="--accent:var(--blue)">
+            <h2>1 · Thử nghiệm mô hình</h2>
+            <p>Inference DuplexOmni trên Modal và đọc pipeline Phase 2 để hiểu yêu cầu triển khai full-duplex.</p>
+            <p><strong>Kết luận thực tế:</strong> compute quá lớn để dùng cho các phần nghiên cứu tiếp theo.</p>
+          </article>
+          <article class="content-card" style="--accent:var(--violet)">
+            <h2>2 · Survey & xác định vấn đề</h2>
+            <p>Đọc literature về PersonaPlex, turn-taking, proactive intervention và RL.</p>
+            <p>Từ các limitation có bằng chứng, thu hẹp thành ba câu hỏi P01–P03.</p>
+          </article>
+          <article class="content-card" style="--accent:var(--green)">
+            <h2>3 · Kiểm chứng P03</h2>
+            <p>Chuẩn bị dữ liệu paired instruction và adapter chạy PersonaPlex để đo hành vi trên cùng audio.</p>
+            <p><strong>Trạng thái:</strong> pilot đang được kiểm thử; chưa kết luận về hiệu quả hay huấn luyện.</p>
+          </article>
+        </div>
+        <div class="slide-foot">Thông điệp xuyên suốt: phân biệt kết quả paper, quan sát của dự án và giả thuyết nghiên cứu.</div>
+      </section>
+
+      <section class="slide content-slide" aria-label="Inference DuplexOmni và PersonaPlex">
+        <div class="eyebrow">Phase 2 · inference exploration</div>
+        <h1>DuplexOmni giúp kiểm tra hạ tầng và đọc code</h1>
+        <p class="subtitle">Đây là bước khảo sát kỹ thuật; chi phí triển khai khiến hướng này không phù hợp làm nền cho các thí nghiệm tiếp theo.</p>
+        <div class="content-grid">
+          <article class="content-card" style="--accent:var(--blue)">
+            <h2>DuplexOmni · thử inference</h2>
+            <ul>
+              <li>Chuẩn bị source, checkpoint và runtime trên Modal; build modified vLLM cho A100.</li>
+              <li>Đã thử model load và inference BF16 từ WAV trên cấu hình 4×A100, nhận transcript và audio đầu ra.</li>
+              <li>Đọc pipeline Thinker, Talker/MTP, Orchestrator và luồng inference Phase 2.</li>
+              <li>Sau đó inference thử PersonaPlex 7B trên Modal và đọc cả offline WAV lẫn server WebSocket để chuẩn bị Phase 3.</li>
+            </ul>
+          </article>
+          <article class="content-card" style="--accent:var(--amber)">
+            <h2>Ranh giới compute</h2>
+            <p class="metric">4× A100</p>
+            <p>Đây là lần inference thử đã ghi nhận. Cấu hình 8×A100 từng được chuẩn bị nhưng không phải cơ sở cho các phần nghiên cứu sau.</p>
+            <p><strong>Quyết định:</strong> chuyển trọng tâm sang PersonaPlex và pilot nhỏ hơn; không tuyên bố đã reproduce full training pipeline.</p>
+          </article>
+        </div>
+        <div class="slide-foot">Nguồn dự án: report/infer_summary_report.md · docs/inference_duplexomni/submission_summary.md</div>
+      </section>
+
+      <section class="slide content-slide" aria-label="Các bước inference DuplexOmni">
+        <div class="eyebrow">Phase 2 · DuplexOmni inference path</div>
+        <h1>Các bước thử inference DuplexOmni</h1>
+        <p class="subtitle">Tách việc dựng môi trường khỏi bước nạp model và chạy WAV để tìm lỗi theo từng tầng.</p>
+        <div class="content-grid three-up">
+          <article class="content-card" style="--accent:var(--blue)">
+            <h2>1 · Chuẩn bị source & checkpoint</h2>
+            <ul>
+              <li>Pin source DuplexOmni và model trong Modal Volume.</li>
+              <li>Kiểm tra file checkpoint và cấu hình model trước khi load.</li>
+            </ul>
+          </article>
+          <article class="content-card" style="--accent:var(--violet)">
+            <h2>2 · Build runtime cho A100</h2>
+            <ul>
+              <li>Dùng CUDA 12.8 devel, Python 3.11, PyTorch 2.9.1.</li>
+              <li>Build modified vLLM với kiến trúc A100 sm80; chạy import và model-load smoke checks.</li>
+            </ul>
+          </article>
+          <article class="content-card" style="--accent:var(--green)">
+            <h2>3 · Chạy inference WAV</h2>
+            <ul>
+              <li>Chạy BF16 inference trên 4×A100; kiểm tra transcript và WAV đầu ra.</li>
+              <li>Realtime mic bridge đã được chuẩn bị; transcript/playback chưa được xác nhận ổn định.</li>
+            </ul>
+          </article>
+        </div>
+        <div class="slide-foot">Rào cản: cấu hình realtime mục tiêu cần 8×A100-80GB và modified runtime; bước 8 GPU chưa được ghi nhận hoàn tất.</div>
+      </section>
+
+      <section class="slide content-slide" aria-label="Các bước inference PersonaPlex">
+        <div class="eyebrow">Phase 2 → Phase 3 · PersonaPlex inference path</div>
+        <h1>Các bước chạy PersonaPlex trên Modal</h1>
+        <p class="subtitle">Model chạy trên GPU từ xa; máy local đóng vai trò giao diện, proxy và scenario runner.</p>
+        <div class="content-grid three-up">
+          <article class="content-card" style="--accent:var(--blue)">
+            <h2>1 · Model service</h2>
+            <ul>
+              <li>Tải checkpoint gated vào Modal Volume và pin NVIDIA source revision.</li>
+              <li>Khởi động <code>moshi.server</code> trên A100 qua adapter Modal.</li>
+            </ul>
+          </article>
+          <article class="content-card" style="--accent:var(--green)">
+            <h2>2 · Nối client tới model</h2>
+            <ul>
+              <li>Chạy local authenticated proxy tới Modal endpoint.</li>
+              <li>Gửi role text, voice prompt và audio Opus qua WebSocket.</li>
+              <li>Server giải mã audio, Mimi mã hóa frame, LMGen sinh text/audio, rồi trả audio về client.</li>
+            </ul>
+          </article>
+          <article class="content-card" style="--accent:var(--amber)">
+            <h2>3 · Từ thử tay đến pilot</h2>
+            <ul>
+              <li>Thử PersonaPlex 7B trên Modal và kiểm tra đầu ra audio.</li>
+              <li>Sau đó chuẩn bị DSB-IFEval offline adapter và WebSocket rollout cho P03.</li>
+              <li>Instruction hiện được truyền khi mở session.</li>
+            </ul>
+          </article>
+        </div>
+        <div class="slide-foot">Credentials ở Modal Secret/proxy prompt; checkpoint không nằm trong repo. Server inference và client scenario runner là hai phần riêng.</div>
+      </section>
 
       <section class="slide active architecture-slide" aria-label="Kiến trúc end-to-end">
         <div class="eyebrow">PersonaPlex 7B · luồng inference</div>
@@ -263,6 +391,203 @@
           </article>
         </div>
         <div class="callout">Mimi là audio codec · Temporal Transformer giữ ngữ cảnh liên frame · Depformer sinh các audio codebook trong một frame.</div>
+      </section>
+
+      <section class="slide content-slide" aria-label="Survey và khoảng trống nghiên cứu">
+        <div class="eyebrow">Research synthesis · paper evidence</div>
+        <h1>Từ survey literature đến ba failure mode</h1>
+        <p class="subtitle">Các paper cho thấy vấn đề về nội dung, thời điểm và instruction cần được đo riêng; số liệu là của paper, chưa phải kết quả reproduce tại dự án.</p>
+        <div class="content-grid three-up">
+          <article class="content-card" style="--accent:var(--green)">
+            <h2>P01 · Adapt khi bị chen lời</h2>
+            <p>Trong 66 collaboration cues hợp lệ, PersonaPlex chọn ADAPT 34,8%, so với 68,2% ở người.</p>
+            <p>ADAPT có thể chỉ là acknowledgement; tỷ lệ này chưa đo việc sửa đúng nội dung mới.</p>
+            <p class="source"><a href="https://arxiv.org/abs/2609.13117">Continue, Adapt, or Yield (2026)</a></p>
+          </article>
+          <article class="content-card" style="--accent:var(--amber)">
+            <h2>P02 · Can thiệp khi cần</h2>
+            <p>Trong matched triggers, PersonaPlex lên tiếng ở 34% câu hỏi trực tiếp nhưng 7% false-fact triggers.</p>
+            <p>Onset thấp chưa chứng minh model nhận ra lỗi rồi quyết định im lặng.</p>
+            <p class="source"><a href="https://arxiv.org/abs/2609.19596">Take the Floor When Asked, Not When Needed (2026)</a></p>
+          </article>
+          <article class="content-card" style="--accent:var(--violet)">
+            <h2>P03 · Làm theo policy instruction</h2>
+            <p>Instruct-FD báo cáo IAS 47,0%; Continue 90%, nhưng Interrupt 10% và Backchannel 5,8%.</p>
+            <p>Điểm benchmark đo tuân thủ trong setup đó, không chứng minh nội dung phản hồi đúng.</p>
+            <p class="source"><a href="https://arxiv.org/abs/2607.20460">Instruct-FD (2026)</a></p>
+          </article>
+        </div>
+        <div class="slide-foot">Nguồn tổng hợp: docs/optimize_personaPlex/personaplex_problem_first_research_proposals.md · docs/research_gap/Speech_AI_Literature_Review_25_Papers.md</div>
+      </section>
+
+      <section class="slide content-slide" aria-label="P01 semantic adaptation">
+        <div class="eyebrow">P01 · In-turn semantic adaptation</div>
+        <h1>Model cần cập nhật ý, không chỉ nhận lời</h1>
+        <p class="subtitle">Khi PersonaPlex đang nói, người dùng có thể chen thêm ràng buộc hoặc sửa thông tin; hành vi tốt là tiếp tục với nội dung đã cập nhật khi phù hợp.</p>
+        <div class="content-grid">
+          <article class="content-card" style="--accent:var(--green)">
+            <h2>Bằng chứng & research gap</h2>
+            <ul>
+              <li>Paper báo cáo ADAPT 34,8% cho PersonaPlex và 68,2% cho người trên 66 collaboration pairs.</li>
+              <li>Nhãn ADAPT gồm acknowledgement; chưa trả lời liệu agent có dùng đúng constraint mới trong phần nói tiếp theo.</li>
+              <li><strong>Gap:</strong> đo correct content uptake trong overlap, đồng thời tránh false adaptation hoặc yield không cần thiết.</li>
+            </ul>
+          </article>
+          <article class="content-card" style="--accent:var(--blue)">
+            <h2>Phương pháp có thể thử</h2>
+            <ul>
+              <li><strong>LoRA-GRPO:</strong> reward cho uptake đúng; guardrail cho stale content, acknowledgement rỗng và yield sai.</li>
+              <li><strong>LoRA-SFT:</strong> học từ continuation đã sửa đúng, nếu có đủ dữ liệu speech target phù hợp.</li>
+              <li><strong>Controller:</strong> chọn CONTINUE / ADAPT / YIELD chỉ có ý nghĩa khi có executor làm thay đổi lời sinh ra.</li>
+            </ul>
+          </article>
+        </div>
+        <div class="slide-foot">Go/no-go: baseline phải thể hiện failure; verifier phân biệt được sửa đúng với lặp lại từ khóa hoặc chỉ nói “okay”.</div>
+      </section>
+
+      <section class="slide content-slide" aria-label="P02 content-driven intervention">
+        <div class="eyebrow">P02 · Content-driven proactive intervention</div>
+        <h1>Can thiệp đúng nội dung, đúng lúc</h1>
+        <p class="subtitle">Mục tiêu là lên tiếng khi có lý do nội dung rõ ràng, nhưng giữ im lặng với nội dung trung tính để tránh biến “nói nhiều hơn” thành kết quả giả.</p>
+        <div class="content-grid">
+          <article class="content-card" style="--accent:var(--amber)">
+            <h2>Bằng chứng & research gap</h2>
+            <ul>
+              <li>PersonaPlex onset: 34% với câu hỏi trực tiếp, 7% với false fact và 10% với neutral trigger trong setup paper.</li>
+              <li>Chỉ khoảng 15% câu trả lời không rỗng ở một phân tích false-fact đã phản bác/sửa nội dung theo judge.</li>
+              <li><strong>Gap:</strong> tách nhận diện trigger, quyết định can thiệp và tính đúng của lời sửa.</li>
+            </ul>
+          </article>
+          <article class="content-card" style="--accent:var(--violet)">
+            <h2>Phương pháp có thể thử</h2>
+            <ul>
+              <li><strong>Evidence-gated policy:</strong> cấp fact/ground truth theo scenario để tách thiếu kiến thức khỏi lỗi turn policy.</li>
+              <li><strong>LoRA-RL:</strong> reward intervention đúng và đúng thời điểm; phạt false alarm trên neutral matched controls.</li>
+              <li><strong>Lightweight controller:</strong> quyết định trigger trước; chỉ claim cải thiện end-to-end khi generator thực thi được quyết định.</li>
+            </ul>
+          </article>
+        </div>
+        <div class="slide-foot">Guardrails: correction correctness · useful intervention precision/recall · false intervention · latency · naturalness.</div>
+      </section>
+
+      <section class="slide content-slide" aria-label="P03 instruction-conditioned turn control">
+        <div class="eyebrow">P03 · Instruction-conditioned turn control</div>
+        <h1>Cùng một audio, policy khác có đổi hành vi?</h1>
+        <p class="subtitle">P03 tập trung vào độ nhạy theo instruction: nghe yên lặng, backchannel hay ngắt lời khi trigger phù hợp xuất hiện.</p>
+        <div class="content-grid">
+          <article class="content-card" style="--accent:var(--violet)">
+            <h2>Bằng chứng & research gap</h2>
+            <ul>
+              <li>Instruct-FD: IAS tổng thể 47,0%; Continue 90%, Listen 66,7%, Interrupt 10%, Backchannel 5,8%.</li>
+              <li>Instruction sensitivity nhỏ: Interrupt +5,0 điểm %, Backchannel −2,5 điểm %; khác biệt không có ý nghĩa sau hiệu chỉnh trong paper.</li>
+              <li><strong>Gap:</strong> kiểm tra policy sensitivity trên matched input, không chỉ tăng tần suất một hành vi.</li>
+            </ul>
+          </article>
+          <article class="content-card" style="--accent:var(--green)">
+            <h2>Phương pháp có thể thử</h2>
+            <ul>
+              <li><strong>Paired LoRA-GRPO:</strong> cùng audio/context, instruction đối nghịch; reward hành vi đúng khi điều kiện xảy ra.</li>
+              <li><strong>LoRA-SFT:</strong> dạy cặp policy nếu có ví dụ action có điều kiện và lời đáp tương ứng.</li>
+              <li><strong>Controller:</strong> baseline nhẹ hơn; cần negative control để tránh “luôn ngắt lời khi được yêu cầu”.</li>
+            </ul>
+          </article>
+        </div>
+        <div class="slide-foot">Giới hạn giao diện hiện tại: PersonaPlex nhận text_prompt khi mở phiên; runtime instruction injection cần thay đổi input path.</div>
+      </section>
+
+      <section class="slide content-slide" aria-label="So sánh phương pháp cho P01 đến P03">
+        <div class="eyebrow">Methods · candidate, not results</div>
+        <h1>Ba vấn đề cần reward và đối chứng riêng</h1>
+        <p class="subtitle">Các phương pháp dưới đây là lựa chọn để pilot; chưa có phương pháp nào được xác nhận đã cải thiện PersonaPlex trong dự án này.</p>
+        <div class="content-grid three-up">
+          <article class="content-card" style="--accent:var(--green)">
+            <h2>P01 · Nội dung</h2>
+            <p>Ưu tiên semantic verifier cho constraint uptake; GRPO nếu có reward phân biệt rollout. SFT cần target continuation đáng tin.</p>
+            <p><strong>Guard:</strong> không tính acknowledgement đơn thuần là uptake.</p>
+          </article>
+          <article class="content-card" style="--accent:var(--amber)">
+            <h2>P02 · Trigger + timing</h2>
+            <p>Kết hợp trigger có grounding với reward correctness và onset; neutral examples là negative controls.</p>
+            <p><strong>Guard:</strong> tránh tối ưu onset đơn lẻ thành nói quá nhiều.</p>
+          </article>
+          <article class="content-card" style="--accent:var(--violet)">
+            <h2>P03 · Policy sensitivity</h2>
+            <p>Paired same-audio scenarios; tối ưu thay đổi hành vi theo instruction bằng GRPO/SFT hoặc controller.</p>
+            <p><strong>Guard:</strong> chấm false action khi trigger không có.</p>
+          </article>
+        </div>
+        <div class="slide-foot">Prior art: Multi-Faceted Interactivity Alignment (GRPO) · ASPIRin/HiPLEX/DuplexPO (tách control, content và event credit) · SteerablePlex (instruction runtime, LoRA/GDPO).</div>
+      </section>
+
+      <section class="slide content-slide" aria-label="Phương án LoRA-GRPO đề xuất cho P03">
+        <div class="eyebrow">Proposed solution · P03 LoRA-GRPO</div>
+        <h1>RL học policy nhạy theo instruction như thế nào?</h1>
+        <p class="subtitle">Giữ audio và scenario cố định, sinh nhiều phương án trả lời, rồi cập nhật LoRA theo hành vi có reward tốt hơn trong cùng điều kiện.</p>
+        <div class="content-grid">
+          <article class="content-card" style="--accent:var(--violet)">
+            <h2>Rollout & reward</h2>
+            <ul>
+              <li>Mỗi nhóm rollout dùng cùng audio, instruction và trigger; đối chiếu LISTEN với BACKCHANNEL/INTERRUPT khi scenario cho phép.</li>
+              <li>Chấm riêng: đúng action, timing, chất lượng nội dung, false action khi trigger vắng mặt.</li>
+              <li>Ví dụ: reward backchannel ngắn đúng cơ hội; phạt takeover dài và câu nói chen vào neutral control.</li>
+            </ul>
+          </article>
+          <article class="content-card" style="--accent:var(--amber)">
+            <h2>Cập nhật policy & điều kiện</h2>
+            <ul>
+              <li>Chuẩn hóa reward giữa các rollout cùng input (GRPO), cập nhật LoRA; giữ reference/KL để hạn chế regression.</li>
+              <li>Ứng viên ban đầu: LoRA trên Temporal Transformer/text policy; chốt chính xác stream và mask sau khi dựng log-prob path.</li>
+              <li>Upstream rollout hiện no-grad và chưa cung cấp đầy đủ training interface; cần scoring/update path có gradient và bảo toàn delay/cache.</li>
+            </ul>
+          </article>
+        </div>
+        <div class="slide-foot">Đây là đề xuất chưa chạy. Gate: kiểm chứng human-vs-scorer → reward có phân biệt rollout → profile một optimizer step trên GPU.</div>
+      </section>
+
+      <section class="slide content-slide" aria-label="Trạng thái kiểm chứng P03">
+        <div class="eyebrow">P03 · Current pilot</div>
+        <h1>Đang kiểm tra policy trên benchmark audio</h1>
+        <p class="subtitle">Pilot dùng cùng input theo các điều kiện L1/L2 để kiểm tra hành vi; đây là bước baseline/evaluation trước khi cân nhắc training.</p>
+        <div class="content-grid">
+          <article class="content-card" style="--accent:var(--blue)">
+            <h2>Dữ liệu & runner đã chuẩn bị</h2>
+            <ul>
+              <li>DSB-IFEval subset: 10 tình huống, 20 ca instruction L1/L2 và 20 WAV; gồm LISTEN, BACKCHANNEL, NO_BACKCHANNEL.</li>
+              <li>Modal adapter <code>modal_p03_dsb.py</code> chạy PersonaPlex offline, ghép audio hai kênh và ghi recording/score.</li>
+              <li>Dataset subset ghi license CC-BY-NC-4.0; cần giữ attribution và tuân thủ điều khoản.</li>
+            </ul>
+          </article>
+          <article class="content-card" style="--accent:var(--amber)">
+            <h2>Phân biệt hai pipeline</h2>
+            <ul>
+              <li>DSB pilot là benchmark adapter hiện đang được test trên các mức conditioning L1/L2.</li>
+              <li>Phase 3 custom WebSocket pipeline có 5 draft pairs và scorer RMS/VAD cùng manual review; các cặp này chưa thành ready scenarios.</li>
+              <li>Chưa có kết quả baseline được lưu trong <code>Phase_3/runs</code>; chưa kết luận model đã fail hoặc pass P03.</li>
+            </ul>
+          </article>
+        </div>
+        <div class="slide-foot">Mục tiêu gần nhất: hoàn tất rollout, nghe review mù một phần output, đối chiếu scorer và báo cáo instruction sensitivity.</div>
+      </section>
+
+      <section class="slide content-slide" aria-label="Lộ trình nghiên cứu và điều kiện tiếp tục">
+        <div class="eyebrow">Decision gates · next steps</div>
+        <h1>Đo baseline trước, chỉ train khi có tín hiệu đáng tin</h1>
+        <p class="subtitle">Compute và chất lượng reward là các cổng quyết định, không phải giả định sẵn có.</p>
+        <div class="content-grid three-up">
+          <article class="content-card" style="--accent:var(--blue)">
+            <h2>1 · Baseline</h2>
+            <p>Chạy paired conditions và repeats; lưu prompt, model revision, audio, transcript, timing và lỗi.</p>
+          </article>
+          <article class="content-card" style="--accent:var(--green)">
+            <h2>2 · Kiểm chứng scorer</h2>
+            <p>Nghe output khi chưa nhìn heuristic score; so sánh người chấm với VAD và kiểm tra false positives/negatives.</p>
+          </article>
+          <article class="content-card" style="--accent:var(--amber)">
+            <h2>3 · Go / no-go</h2>
+            <p>Chỉ sau khi có failure lặp lại và reward phân biệt rollout mới profile một bước training LoRA trên GPU mục tiêu.</p>
+          </article>
+        </div>
+        <div class="slide-foot">GRPO trên PersonaPlex 7B với 1×A100 chưa được xác nhận; inference chạy được không đồng nghĩa optimizer step sẽ fit.</div>
       </section>
 
       <div class="progress" id="progress"></div>

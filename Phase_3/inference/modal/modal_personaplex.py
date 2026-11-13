@@ -19,6 +19,7 @@ import modal
 
 APP_NAME = "personaplex"
 MODEL_REPO = "nvidia/personaplex-7b-v1"
+UPSTREAM_COMMIT = "3428dfd95309a7f3c84fd93259ded0f810d1ff91"
 HF_SECRET_NAME = "personaplexHF"
 MODEL_CACHE_PATH = "/cache/huggingface"
 SERVER_PORT = 8998
@@ -39,7 +40,8 @@ image = (
         extra_options="--index-url https://download.pytorch.org/whl/cu124",
     )
     .run_commands(
-        "git clone --depth 1 https://github.com/NVIDIA/personaplex.git /opt/personaplex"
+        "git clone https://github.com/NVIDIA/personaplex.git /opt/personaplex && "
+        f"git -C /opt/personaplex checkout {UPSTREAM_COMMIT}"
     )
     .pip_install("/opt/personaplex/moshi")
 )

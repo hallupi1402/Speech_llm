@@ -1,0 +1,12 @@
+{
+  "manifest": "data/p03/scenarios.jsonl",
+  "run_root": "runs/p03/baseline",
+  "ws_base_url": "ws://127.0.0.1:8765",
+  "model_repo": "nvidia/personaplex-7b-v1",
+  "upstream_commit": "3428dfd95309a7f3c84fd93259ded0f810d1ff91",
+  "repeats": 2,
+  "chunk_ms": 20,
+  "quiet_timeout_s": 2.0,
+  "max_extra_wait_s": 15.0,
+  "handshake_timeout_s": 120.0
+}
