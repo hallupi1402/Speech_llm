@@ -3,7 +3,9 @@ docs/coding_agent_context_prompt_guide.md
 __pycache__/
 *.py[cod]
 .DS_Store
-docs/
+/docs/*
+!/docs/AVSR/
+!/docs/AVSR/**
 !research_personaplex/docs/
 !research_personaplex/docs/**
 !Phase_2_plan_inference/research_personaplex/docs/
@@ -17,8 +19,4 @@ docs/
 /Phase_3/data/p03/audio/
 /Phase_3/data/p03/dsb_pilot_subset/audio/
 /Phase_3/data/external/
-docs/duplexomni_modal_smoke_test_debug.md
-docs/duplexomni_next_steps_research.md
-docs/submission_summary.md
-docs/duplexomni_inference_plan.md
-/home/yennguyen/Seminar/Phase_2_plan_inference/personaplex/.env
+Phase_2_plan_inference/personaplex/.env
